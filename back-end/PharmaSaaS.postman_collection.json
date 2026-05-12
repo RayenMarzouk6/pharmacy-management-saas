@@ -1,0 +1,871 @@
+{
+  "info": {
+    "name": "PharmaSaaS",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Collection for the PharmaSaaS backend. Uses {{root_url}} for public routes and {{api_base_url}} for authenticated API routes."
+  },
+  "variable": [
+    { "key": "root_url", "value": "http://localhost:9090" },
+    { "key": "api_base_url", "value": "http://localhost:9090/api" },
+    { "key": "jwt_token", "value": "" },
+    { "key": "pharmacie_id", "value": "" },
+    { "key": "pharmacien_id", "value": "" },
+    { "key": "fournisseur_id", "value": "" },
+    { "key": "medicament_id", "value": "" },
+    { "key": "vente_id", "value": "" },
+    { "key": "plan_id", "value": "" },
+    { "key": "abonnement_id", "value": "" },
+    { "key": "payment_id", "value": "" },
+    { "key": "payment_url", "value": "" },
+    { "key": "dashboard_path", "value": "" },
+    { "key": "redirectUrl", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"pharmacien@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{root_url}}/auth/login",
+              "host": ["{{root_url}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.token) { pm.environment.set('jwt_token', json.token); }",
+                  "if (json.pharmacieId) { pm.environment.set('pharmacie_id', json.pharmacieId); }",
+                  "if (json.userId) { pm.environment.set('pharmacien_id', json.userId); }",
+                  "if (json.dashboardPath) { pm.environment.set('dashboard_path', json.dashboardPath); pm.environment.set('redirectUrl', 'http://localhost:3000' + json.dashboardPath); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"sara\",\n  \"lastName\": \"ben saleh\",\n  \"email\": \"sara@gmail.com\",\n  \"password\": \"azertyui\",\n  \"pharmacyName\": \"Pharmacie de Sara\",\n  \"pharmacyAddress\": \"123 Rue Principale, Ville\",\n  \"phoneNumber\": \"0600000000\"\n}"
+            },
+            "url": {
+              "raw": "{{root_url}}/auth/register",
+              "host": ["{{root_url}}"],
+              "path": ["auth", "register"]
+            },
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "const json = pm.response.json();",
+                    "if (json.token) { pm.environment.set('jwt_token', json.token); }",
+                    "if (json.pharmacieId) { pm.environment.set('pharmacie_id', json.pharmacieId); }",
+                    "if (json.userId) { pm.environment.set('pharmacien_id', json.userId); }",
+                    "if (json.dashboardPath) { pm.environment.set('dashboard_path', json.dashboardPath); pm.environment.set('redirectUrl', 'http://localhost:3000' + json.dashboardPath); }"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "SuperAdmin",
+      "item": [
+        {
+          "name": "Initialize SuperAdmin",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Rayen\",\n  \"lastName\": \"Admin\",\n  \"email\": \"superadmin@example.com\",\n  \"password\": \"password\",\n  \"pharmacyName\": \"Pharmacie Centrale\",\n  \"pharmacyAddress\": \"Centre Ville\",\n  \"phoneNumber\": \"0600000000\",\n  \"initSecret\": \"SuperAdminSecureInitKey2024\"\n}"
+            },
+            "url": {
+              "raw": "{{root_url}}/superadmin/init",
+              "host": ["{{root_url}}"],
+              "path": ["superadmin", "init"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pharmacies",
+      "item": [
+        {
+          "name": "Create Pharmacy",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Pharmacie Centrale\",\n  \"adresse\": \"Centre Ville\",\n  \"telephone\": \"0600000000\",\n  \"tenantId\": \"centrale-01\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/pharmacies",
+              "host": ["{{api_base_url}}"],
+              "path": ["pharmacies"]
+            }
+          }
+        },
+        {
+          "name": "List Pharmacies",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/pharmacies",
+              "host": ["{{api_base_url}}"],
+              "path": ["pharmacies"]
+            }
+          }
+        },
+        {
+          "name": "Get Pharmacy By Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/pharmacies/{{pharmacie_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["pharmacies", "{{pharmacie_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Pharmacy",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Pharmacie Centrale Mise a Jour\",\n  \"adresse\": \"Nouveau Centre Ville\",\n  \"telephone\": \"0600000001\",\n  \"tenantId\": \"centrale-01\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/pharmacies/{{pharmacie_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["pharmacies", "{{pharmacie_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Pharmacy",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/pharmacies/{{pharmacie_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["pharmacies", "{{pharmacie_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pharmaciens",
+      "item": [
+        {
+          "name": "Create Pharmacien",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Amine\",\n  \"lastName\": \"Fares\",\n  \"email\": \"amine.pharmacien@example.com\",\n  \"password\": \"password\",\n  \"role\": \"PHARMACIEN\",\n  \"matricule\": \"PH-001\",\n  \"specialite\": \"Officine\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/pharmaciens",
+              "host": ["{{api_base_url}}"],
+              "path": ["pharmaciens"]
+            }
+          }
+        },
+        {
+          "name": "List Pharmaciens",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/pharmaciens",
+              "host": ["{{api_base_url}}"],
+              "path": ["pharmaciens"]
+            }
+          }
+        },
+        {
+          "name": "Get Pharmacien By Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/pharmaciens/{{pharmacien_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["pharmaciens", "{{pharmacien_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Pharmacien",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Amine\",\n  \"lastName\": \"Fares\",\n  \"email\": \"amine.updated@example.com\",\n  \"password\": \"password\",\n  \"role\": \"PHARMACIEN\",\n  \"matricule\": \"PH-001\",\n  \"specialite\": \"Galenique\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/pharmaciens/{{pharmacien_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["pharmaciens", "{{pharmacien_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Pharmacien",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/pharmaciens/{{pharmacien_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["pharmaciens", "{{pharmacien_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fournisseurs",
+      "item": [
+        {
+          "name": "Create Fournisseur",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Pharma Supply\",\n  \"telephone\": \"0611111111\",\n  \"email\": \"contact@pharmasupply.com\",\n  \"adresse\": \"Zone Industrielle\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/fournisseurs",
+              "host": ["{{api_base_url}}"],
+              "path": ["fournisseurs"]
+            }
+          }
+        },
+        {
+          "name": "List Fournisseurs",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/fournisseurs?search=&page=0&size=10",
+              "host": ["{{api_base_url}}"],
+              "path": ["fournisseurs"],
+              "query": [
+                { "key": "search", "value": "" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Fournisseur By Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/fournisseurs/{{fournisseur_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["fournisseurs", "{{fournisseur_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Fournisseur",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Pharma Supply Updated\",\n  \"telephone\": \"0611111112\",\n  \"email\": \"contact.updated@pharmasupply.com\",\n  \"adresse\": \"Nouvelle Zone Industrielle\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/fournisseurs/{{fournisseur_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["fournisseurs", "{{fournisseur_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Fournisseur",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/fournisseurs/{{fournisseur_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["fournisseurs", "{{fournisseur_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Medicaments",
+      "item": [
+        {
+          "name": "Create Medicament",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Doliprane\",\n  \"imageUrl\": \"https://example.com/doliprane.png\",\n  \"description\": \"Paracetamol 500mg\",\n  \"prix\": 12.5,\n  \"quantiteStock\": 100,\n  \"seuilAlerte\": 15,\n  \"dateExpiration\": \"2027-12-31\",\n  \"codeBarres\": \"1234567890123\",\n  \"fournisseurId\": \"00000000-0000-0000-0000-000000000001\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/medicaments",
+              "host": ["{{api_base_url}}"],
+              "path": ["medicaments"]
+            }
+          }
+        },
+        {
+          "name": "List Medicaments",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/medicaments?search=&page=0&size=10",
+              "host": ["{{api_base_url}}"],
+              "path": ["medicaments"],
+              "query": [
+                { "key": "search", "value": "" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Medicament By Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/medicaments/{{medicament_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["medicaments", "{{medicament_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Medicament",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Doliprane 500\",\n  \"imageUrl\": \"https://example.com/doliprane-500.png\",\n  \"description\": \"Paracetamol 500mg updated\",\n  \"prix\": 13.0,\n  \"quantiteStock\": 120,\n  \"seuilAlerte\": 20,\n  \"dateExpiration\": \"2028-12-31\",\n  \"codeBarres\": \"1234567890123\",\n  \"fournisseurId\": \"00000000-0000-0000-0000-000000000001\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/medicaments/{{medicament_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["medicaments", "{{medicament_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Medicament",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/medicaments/{{medicament_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["medicaments", "{{medicament_id}}"]
+            }
+          }
+        },
+        {
+          "name": "List Low Stock Medicaments",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/medicaments/stock-faible",
+              "host": ["{{api_base_url}}"],
+              "path": ["medicaments", "stock-faible"]
+            }
+          }
+        },
+        {
+          "name": "List Expiring Medicaments",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/medicaments/expires?daysFromNow=30",
+              "host": ["{{api_base_url}}"],
+              "path": ["medicaments", "expires"],
+              "query": [
+                { "key": "daysFromNow", "value": "30" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ventes",
+      "item": [
+        {
+          "name": "Create Vente",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lignes\": [\n    {\n      \"medicamentId\": \"00000000-0000-0000-0000-000000000001\",\n      \"quantite\": 2\n    },\n    {\n      \"medicamentId\": \"00000000-0000-0000-0000-000000000002\",\n      \"quantite\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/ventes",
+              "host": ["{{api_base_url}}"],
+              "path": ["ventes"]
+            }
+          }
+        },
+        {
+          "name": "List Ventes",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/ventes?page=0&size=10",
+              "host": ["{{api_base_url}}"],
+              "path": ["ventes"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Vente By Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/ventes/{{vente_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["ventes", "{{vente_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Facture PDF",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/ventes/{{vente_id}}/facture",
+              "host": ["{{api_base_url}}"],
+              "path": ["ventes", "{{vente_id}}", "facture"]
+            }
+          }
+        },
+        {
+          "name": "Update Vente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"ANNULEE\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/ventes/{{vente_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["ventes", "{{vente_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Vente",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/ventes/{{vente_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["ventes", "{{vente_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Admin Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/admin/dashboard",
+              "host": ["{{api_base_url}}"],
+              "path": ["admin","dashboard"]
+            }
+          }
+        },
+        {
+          "name": "Get Pharmacien Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/pharmacien/dashboard",
+              "host": ["{{api_base_url}}"],
+              "path": ["pharmacien","dashboard"]
+            }
+          }
+        },
+        {
+          "name": "Get SuperAdmin Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/superadmin/dashboard",
+              "host": ["{{api_base_url}}"],
+              "path": ["superadmin","dashboard"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Plans",
+      "item": [
+        {
+          "name": "Create Plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"STARTER\",\n  \"prixMensuel\": 29.99,\n  \"maxUtilisateurs\": 5,\n  \"features\": [\"Gestion Medicaments\", \"Gestion Ventes\", \"Dashboard\", \"Factures\"]\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/plans",
+              "host": ["{{api_base_url}}"],
+              "path": ["plans"]
+            }
+          }
+        },
+        {
+          "name": "List Plans",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/plans",
+              "host": ["{{api_base_url}}"],
+              "path": ["plans"]
+            }
+          }
+        },
+        {
+          "name": "Get Plan By Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/plans/{{plan_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["plans", "{{plan_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Plan",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"STARTER\",\n  \"prixMensuel\": 34.99,\n  \"maxUtilisateurs\": 10,\n  \"features\": [\"Gestion Medicaments\", \"Gestion Ventes\", \"Dashboard\", \"Factures\", \"Historique\"]\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/plans/{{plan_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["plans", "{{plan_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Plan",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/plans/{{plan_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["plans", "{{plan_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Abonnements",
+      "item": [
+        {
+          "name": "Create Abonnement",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dateDebut\": \"2026-05-11\",\n  \"dateFin\": \"2027-05-11\",\n  \"statut\": \"ACTIF\",\n  \"planId\": \"00000000-0000-0000-0000-000000000001\",\n  \"pharmacieId\": \"00000000-0000-0000-0000-000000000002\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/abonnements",
+              "host": ["{{api_base_url}}"],
+              "path": ["abonnements"]
+            }
+          }
+        },
+        {
+          "name": "List Abonnements",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/abonnements",
+              "host": ["{{api_base_url}}"],
+              "path": ["abonnements"]
+            }
+          }
+        },
+        {
+          "name": "Get Abonnement By Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/abonnements/{{abonnement_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["abonnements", "{{abonnement_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Abonnement",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dateDebut\": \"2026-05-11\",\n  \"dateFin\": \"2027-05-11\",\n  \"statut\": \"SUSPENDU\",\n  \"planId\": \"00000000-0000-0000-0000-000000000001\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/abonnements/{{abonnement_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["abonnements", "{{abonnement_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Abonnement",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/abonnements/{{abonnement_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["abonnements", "{{abonnement_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Create Flouci Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planId\": \"00000000-0000-0000-0000-000000000001\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base_url}}/payments/flouci/plans/{{plan_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["payments", "flouci", "plans", "{{plan_id}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.paymentId) { pm.environment.set('payment_id', json.paymentId); }",
+                  "if (json.paymentUrl) { pm.environment.set('payment_url', json.paymentUrl); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Verify Flouci Payment",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/payments/flouci/verify/{{payment_id}}",
+              "host": ["{{api_base_url}}"],
+              "path": ["payments", "flouci", "verify", "{{payment_id}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
